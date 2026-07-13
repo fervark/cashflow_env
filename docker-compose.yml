@@ -1,0 +1,27 @@
+services:
+  pg:
+    networks:
+      - web
+    container_name: cashflow_pg
+    build:
+      context: services/pg
+    env_file:
+      - services/pg/env/base.env
+      - services/pg/env/extended.env
+    environment:
+      - PORT=${PG_PORT}
+    command: postgres -c log_statement=all
+    working_dir: /var/www/pg
+    volumes:
+      - ./services/pg/data:/var/lib/pgsql/data:cached
+      - ./services/pg/cashflow_db_check.sh:/tmp/cashflow_db_check.sh
+      - ./services/pg/cashflow_healthcheck.sh:/tmp/cashflow_healthcheck.sh
+    ports:
+      - ${PG_PORT}:${PG_PORT}
+
+networks:
+  web:
+    driver: bridge
+
+volumes:
+  shared_volume: {}
