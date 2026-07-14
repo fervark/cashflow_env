@@ -34,6 +34,22 @@ pg: pg/container pg/check pg/wait
 # ****************************************************************************
 # APPLICATIONS
 # ****************************************************************************
+cashflow_app/enter:
+	docker compose exec -u docker_user cashflow_app bash
+cashflow_app/source:
+	./source.sh cashflow_app master cashflow_app
+cashflow_app/logs:
+	chmod -R 0777 ../logs
+cashflow_app/env:
+	touch ./services/cashflow_app/env/extended.env
+cashflow_app/config:
+	touch ./services/cashflow_app/config/extended.env
+	(./config.sh cashflow_app)
+cashflow_app/container:
+	docker compose up --build -d cashflow_app
+cashflow_app/migrate:
+	docker compose exec cashflow_app goose up
+cashflow_app: cashflow_app/source cashflow_app/config cashflow_app/container cashflow_app/migrate
 
 
 # ****************************************************************************
@@ -41,7 +57,7 @@ pg: pg/container pg/check pg/wait
 # ****************************************************************************
 # Build
 extend_required: pg/env
-extend_apps:
+extend_apps: cashflow_app/env
 extend_services:
 
 # Init
@@ -50,13 +66,12 @@ init/env:
 user:
 	./user.sh
 init_required: init/env user pg
-init_apps:
-init_services:
+init_apps: cashflow_app
 
 # Build sequence
 extend: extend_required extend_services extend_apps
-init: extend init_required
-#init_services init_apps nginx
+init: extend init_required init_apps
+#  nginx
 
 
 # ****************************************************************************
