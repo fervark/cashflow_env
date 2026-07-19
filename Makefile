@@ -34,22 +34,14 @@ pg: pg/container pg/check pg/wait
 # ****************************************************************************
 # APPLICATIONS
 # ****************************************************************************
-cashflow_app/enter:
-	docker compose exec -u docker_user cashflow_app bash
 cashflow_app/source:
 	./source.sh cashflow_app master cashflow_app
-cashflow_app/logs:
-	chmod -R 0777 ../logs
 cashflow_app/env:
 	touch ./services/cashflow_app/env/extended.env
 cashflow_app/config:
 	touch ./services/cashflow_app/config/extended.env
 	(./config.sh cashflow_app)
-cashflow_app/container:
-	docker compose up --build -d cashflow_app
-cashflow_app/migrate:
-	docker compose exec cashflow_app goose up
-cashflow_app: cashflow_app/source cashflow_app/config cashflow_app/container cashflow_app/migrate
+cashflow_app: cashflow_app/source cashflow_app/config
 
 
 # ****************************************************************************
